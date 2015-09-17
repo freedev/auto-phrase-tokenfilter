@@ -20,14 +20,14 @@ import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.QParser;
-import org.apache.solr.search.QParserPlugin;
+import org.apache.solr.search.ExtendedDismaxQParserPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 
 
-public class AutoPhrasingQParserPlugin extends QParserPlugin implements ResourceLoaderAware {
+public class AutoPhrasingQParserPlugin extends ExtendedDismaxQParserPlugin implements ResourceLoaderAware {
 	
   private static final Logger Log = LoggerFactory.getLogger( AutoPhrasingQParserPlugin.class );
   private CharArraySet phraseSets;
@@ -35,7 +35,7 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
   
   private String parserImpl = "lucene";
   
-  private char replaceWhitespaceWith = 'x';  // preserves stemming
+  private char replaceWhitespaceWith = 0;  // preserves stemming
   
   private boolean ignoreCase = true;
 	
@@ -44,8 +44,13 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
     Log.info( "init ..." );
     SolrParams params = SolrParams.toSolrParams(initArgs);
     phraseSetFiles = params.get( "phrases" );
-	
+
+    Log.info( "phraseSetFiles =" + phraseSetFiles );
+
     String pImpl = params.get( "defType" );
+
+    Log.info( "defType =" + pImpl );
+
     if (pImpl != null) {
       parserImpl = pImpl;
     }
@@ -54,11 +59,16 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
     if (replaceWith != null && replaceWith.length() > 0) {
       replaceWhitespaceWith = replaceWith.charAt(0);
     }
-    
+
+    Log.info( "replaceWhitespaceWith =" + replaceWhitespaceWith );
+
     String ignoreCaseSt = params.get( "ignoreCase" );
     if (ignoreCaseSt != null && ignoreCaseSt.equalsIgnoreCase( "false" )) {
       ignoreCase = false;
     }
+
+    Log.info( "ignoreCase =" + ignoreCaseSt );
+
   }
 
   @Override
@@ -67,10 +77,12 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
     Log.info( "createParser" );
     ModifiableSolrParams modparams = new ModifiableSolrParams( params );
     String modQ = filter( qStr );
-
+    Log.info( "***** modQ = "  + modQ );
     modparams.set( "q", modQ );
-    return req.getCore().getQueryPlugin( parserImpl )
-                        .createParser(modQ, localParams, modparams, req);
+    return super.createParser(modQ, localParams, modparams, req);
+    		
+//    		req.getCore().getQueryPlugin( parserImpl )
+//                        .createParser(modQ, localParams, modparams, req);
   }
 
   private String filter( String qStr ) {	
@@ -110,13 +122,14 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
   }
 	
   private String autophrase( String input ) throws IOException {
-    WhitespaceTokenizer wt = new WhitespaceTokenizer(  new StringReader( input ));
+    WhitespaceTokenizer wt = new WhitespaceTokenizer(org.apache.lucene.util.Version.LUCENE_48, new StringReader( input ));
     TokenStream ts = wt;
     if (ignoreCase) {
-      ts = new LowerCaseFilter( wt );
+      ts = new LowerCaseFilter(org.apache.lucene.util.Version.LUCENE_48, wt );
     }
     AutoPhrasingTokenFilter aptf = new AutoPhrasingTokenFilter( ts, phraseSets, false );
-    aptf.setReplaceWhitespaceWith( new Character( replaceWhitespaceWith ) );
+    if (replaceWhitespaceWith != 0)
+    	aptf.setReplaceWhitespaceWith( new Character( replaceWhitespaceWith ) );
     CharTermAttribute term = aptf.addAttribute(CharTermAttribute.class);
     aptf.reset();
         
@@ -143,10 +156,10 @@ public class AutoPhrasingQParserPlugin extends QParserPlugin implements Resource
     if (files.size() > 0) {
       // default stopwords list has 35 or so words, but maybe don't make it that
       // big to start
-      words = new CharArraySet( files.size() * 10, ignoreCase);
+      words = new CharArraySet( org.apache.lucene.util.Version.LUCENE_48, files.size() * 10, ignoreCase);
       for (String file : files) {
         List<String> wlist = getLines(loader, file.trim());
-    	words.addAll(StopFilter.makeStopSet( wlist, ignoreCase));
+    	words.addAll(StopFilter.makeStopSet(org.apache.lucene.util.Version.LUCENE_48, wlist, ignoreCase));
       }
     }
     return words;
