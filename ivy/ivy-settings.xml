@@ -3,5 +3,6 @@
     <settings defaultResolver="central"/>
     <resolvers>
         <ibiblio name="central" m2compatible="true"/>
+        <ibiblio name="maven" m2compatible="true" root="http://maven.restlet.com/"/>
     </resolvers>
 </ivysettings>
