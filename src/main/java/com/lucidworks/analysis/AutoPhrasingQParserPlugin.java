@@ -74,10 +74,10 @@ public class AutoPhrasingQParserPlugin extends ExtendedDismaxQParserPlugin imple
   @Override
   public QParser createParser( String qStr, SolrParams localParams, SolrParams params,
 			                   SolrQueryRequest req) {
-    Log.info( "createParser" );
+//    Log.info( "createParser" );
     ModifiableSolrParams modparams = new ModifiableSolrParams( params );
     String modQ = filter( qStr );
-    Log.info( "***** modQ = "  + modQ );
+//    Log.info( "***** modQ = "  + modQ );
     modparams.set( "q", modQ );
     return super.createParser(modQ, localParams, modparams, req);
     		
