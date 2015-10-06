@@ -13,3 +13,5 @@ build/**/*.class
 src/**/*.class
 build-lib/**
 dist/**
+**/target/*
+
