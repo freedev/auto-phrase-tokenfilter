@@ -77,10 +77,10 @@ public class AutoPhrasingQParserPlugin extends ExtendedDismaxQParserPlugin imple
 //    Log.info( "createParser" );
     ModifiableSolrParams modparams = new ModifiableSolrParams( params );
     String modQ = filter( qStr );
-//    Log.info( "***** modQ = "  + modQ );
+    Log.info( "***** modQ = "  + modQ );
     modparams.set( "q", modQ );
     return super.createParser(modQ, localParams, modparams, req);
-    		
+    
 //    		req.getCore().getQueryPlugin( parserImpl )
 //                        .createParser(modQ, localParams, modparams, req);
   }
@@ -94,50 +94,54 @@ public class AutoPhrasingQParserPlugin extends ExtendedDismaxQParserPlugin imple
 	// 6) collapse "+ " and "- " to "+" and "-" to glom operators.
 		
     String query = qStr;
-    while( query.contains( " :" ))
-      query = query.replaceAll( "\\s:", ": " );
-
-    query = query.replaceAll( "\\+", "+ " );
-    query = query.replaceAll( "\\-", "- " );
-    
-    if (ignoreCase) {
-      query = query.replaceAll( "AND", "&&" );
-      query = query.replaceAll( "OR", "||" );
+//    while( query.contains( " :" ))
+//      query = query.replaceAll( "\\s:", ": " );
+//
+//    query = query.replaceAll( "\\+", "+ " );
+//    query = query.replaceAll( "\\-", "- " );
+//    
+//    if (ignoreCase) {
+//      query = query.replaceAll( "AND", "&&" );
+//      query = query.replaceAll( "OR", "||" );
+//    }
+    if (query == null) {
+    	return query;
     }
-        
     try {
       query = autophrase( query );
     }
     catch (IOException ioe ) {  }
         
-    query = query.replaceAll( "\\+ ", "+" );
-    query = query.replaceAll( "\\- ", "-" );
-    
-    if (ignoreCase) {
-      query = query.replaceAll( "&&", "AND" );
-      query = query.replaceAll( "\\|\\|", "OR" );
-    }
+//    query = query.replaceAll( "\\+ ", "+" );
+//    query = query.replaceAll( "\\- ", "-" );
+//    
+//    if (ignoreCase) {
+//      query = query.replaceAll( "&&", "AND" );
+//      query = query.replaceAll( "\\|\\|", "OR" );
+//    }
 		
     return query;
   }
 	
   private String autophrase( String input ) throws IOException {
+//  	Log.error("## Found input " + input);
     WhitespaceTokenizer wt = new WhitespaceTokenizer(org.apache.lucene.util.Version.LUCENE_48, new StringReader( input ));
     TokenStream ts = wt;
     if (ignoreCase) {
       ts = new LowerCaseFilter(org.apache.lucene.util.Version.LUCENE_48, wt );
     }
-    AutoPhrasingTokenFilter aptf = new AutoPhrasingTokenFilter( ts, phraseSets, false );
-    if (replaceWhitespaceWith != 0)
-    	aptf.setReplaceWhitespaceWith( new Character( replaceWhitespaceWith ) );
-    CharTermAttribute term = aptf.addAttribute(CharTermAttribute.class);
-    aptf.reset();
-        
     StringBuffer strbuf = new StringBuffer( );
-    while( aptf.incrementToken( )) {
-      strbuf.append( term.toString( ) ).append( " " );
+    try (AutoPhrasingTokenFilter aptf = new AutoPhrasingTokenFilter( ts, phraseSets, false )) {
+	    if (replaceWhitespaceWith != 0)
+	    	aptf.setReplaceWhitespaceWith( new Character( replaceWhitespaceWith ) );
+	    CharTermAttribute term = aptf.addAttribute(CharTermAttribute.class);
+	    aptf.reset();
+	    while( aptf.incrementToken( )) {
+	    	String t = term.toString( );
+//	    	Log.error("## Found term " + t);
+	      strbuf.append( t ).append( " " );
+	    }
     }
-        
     return strbuf.toString();
   }
 

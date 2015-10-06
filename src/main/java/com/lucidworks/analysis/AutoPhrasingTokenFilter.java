@@ -288,10 +288,6 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
 	return null;
   }
 	
-  private boolean isPhrase( char[] phrase ) {
-    return phraseMap != null && phraseMap.containsKey(phrase, 0, phrase.length);
-  }
-	
   private boolean startsWith( char[] buffer, char[] phrase ) {
     if (phrase.length > buffer.length) return false;
     for (int i = 0; i < phrase.length; i++){
@@ -339,10 +335,8 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
 	
 	
   private void emit( char[] token ) {
-	System.out.println( "emit: " + new String( token ) );
-	if (replaceWhitespaceWith != null) {
-		token = replaceWhiteSpace( token );
-	}
+//	System.out.println( "emit: " + new String( token ) );
+	token = replaceWhiteSpace( token );
 	CharTermAttribute termAttr = getTermAttribute( );
 	termAttr.setEmpty( );
 	termAttr.append( new StringBuilder( ).append( token ) );
@@ -371,13 +365,27 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
   
   // replaces whitespace char with replaceWhitespaceWith
   private char[] replaceWhiteSpace( char[] token ) {
-    char[] replaced = new char[ token.length ];
-	for (int i = 0; i < token.length; i++ ) {
-      if (token[i] == ' ' ) {
-        replaced[i] = replaceWhitespaceWith.charValue();
-	  }
-      else {
-        replaced[i] = token[i];
+	String s = new String(token);
+	int countWhiteSpaces = 0;
+	char[] replaced;
+	if (replaceWhitespaceWith != null) {
+		replaced = new char[ token.length ];
+	} else {
+		for (int i = 0; i < token.length; i++ ) {
+			if (token[i] == ' ')
+				countWhiteSpaces++;
+		}
+		replaced = new char[ token.length-countWhiteSpaces ];
+	 }
+	for (int i = 0, j = 0; i < token.length; i++) {
+			if (token[i] == ' ') {
+				if (replaceWhitespaceWith != null) {
+					replaced[j] = replaceWhitespaceWith.charValue();
+					j++;
+				}
+			} else {
+				replaced[j] = token[i];
+				j++;
       }
 	}
 	return replaced;
@@ -423,8 +431,8 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
 	  }
   
 	
-  private CharArrayMap convertPhraseSet( CharArraySet phraseSet ) {
-	CharArrayMap<CharArraySet> phraseMap = new CharArrayMap(org.apache.lucene.util.Version.LUCENE_48, 100, false);
+  private CharArrayMap<CharArraySet> convertPhraseSet( CharArraySet phraseSet ) {
+	CharArrayMap<CharArraySet> phraseMap = new CharArrayMap<>(org.apache.lucene.util.Version.LUCENE_48, 100, false);
 	Iterator<Object> phraseIt = phraseSet.iterator( ); 
 	while (phraseIt != null && phraseIt.hasNext() ) {
 	  char[] phrase = (char[])phraseIt.next();

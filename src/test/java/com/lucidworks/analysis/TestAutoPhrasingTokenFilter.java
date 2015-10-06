@@ -53,7 +53,51 @@ public class TestAutoPhrasingTokenFilter extends TestCase {
     assertTrue(aptf.incrementToken());
     assertEquals( "high", term.toString());
   }
-    
+
+  public void testAutoPhraseWithoutReplaceWith( ) throws Exception {
+	    final CharArraySet phraseSets = new CharArraySet(org.apache.lucene.util.Version.LUCENE_48, Arrays.asList(
+	            "income tax", "tax refund", "property tax" ), false);
+	    
+	    final String input = "what is my income tax refund this year now that my property tax is so high";
+	        
+
+	    StringReader reader = new StringReader(input);
+	    final WhitespaceTokenizer in = new WhitespaceTokenizer(org.apache.lucene.util.Version.LUCENE_48, reader );
+	    AutoPhrasingTokenFilter aptf = new AutoPhrasingTokenFilter( in, phraseSets, false );
+	    aptf.setReplaceWhitespaceWith( null );
+	    CharTermAttribute term = aptf.addAttribute(CharTermAttribute.class);
+	    aptf.reset();
+
+	    assertTrue(aptf.incrementToken());
+	    assertEquals( "what", term.toString());
+	    assertTrue(aptf.incrementToken());
+	    assertEquals( "is", term.toString());
+	    assertTrue(aptf.incrementToken());
+	    assertEquals( "my", term.toString());
+	    assertTrue(aptf.incrementToken());
+	    assertEquals( "incometax", term.toString());
+	    assertTrue(aptf.incrementToken());
+	    assertEquals( "taxrefund", term.toString());
+	    assertTrue(aptf.incrementToken());
+	    assertEquals( "this", term.toString());
+	    assertTrue(aptf.incrementToken());
+	    assertEquals( "year", term.toString());
+	    assertTrue(aptf.incrementToken());
+	    assertEquals( "now", term.toString());
+	    assertTrue(aptf.incrementToken());
+	    assertEquals( "that", term.toString());
+	    assertTrue(aptf.incrementToken());
+	    assertEquals( "my", term.toString());
+	    assertTrue(aptf.incrementToken());
+	    assertEquals( "propertytax", term.toString());
+	    assertTrue(aptf.incrementToken());
+	    assertEquals( "is", term.toString());
+	    assertTrue(aptf.incrementToken());
+	    assertEquals( "so", term.toString());
+	    assertTrue(aptf.incrementToken());
+	    assertEquals( "high", term.toString());
+	  }
+  
   public void testAutoPhraseEmitSingle( ) throws Exception {
     final CharArraySet phraseSets = new CharArraySet(org.apache.lucene.util.Version.LUCENE_48, Arrays.asList(
         "income tax", "tax refund", "property tax" ), false);
