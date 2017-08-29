@@ -2,29 +2,28 @@ package com.lucidworks.analysis;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.lucene.analysis.CharArraySet;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.WordlistLoader;
+import org.apache.lucene.analysis.core.LowerCaseFilter;
 import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.core.WhitespaceTokenizer;
-import org.apache.lucene.analysis.core.LowerCaseFilter;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.analysis.util.ResourceLoader;
 import org.apache.lucene.analysis.util.ResourceLoaderAware;
-import org.apache.lucene.analysis.util.WordlistLoader;
-import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.params.ModifiableSolrParams;
+import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.search.QParser;
 import org.apache.solr.search.ExtendedDismaxQParserPlugin;
+import org.apache.solr.search.QParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.nio.charset.StandardCharsets;
 
 
 public class AutoPhrasingQParserPlugin extends ExtendedDismaxQParserPlugin implements ResourceLoaderAware {
@@ -125,10 +124,11 @@ public class AutoPhrasingQParserPlugin extends ExtendedDismaxQParserPlugin imple
 	
   private String autophrase( String input ) throws IOException {
 //  	Log.error("## Found input " + input);
-    WhitespaceTokenizer wt = new WhitespaceTokenizer(org.apache.lucene.util.Version.LUCENE_48, new StringReader( input ));
+    WhitespaceTokenizer wt = new WhitespaceTokenizer();
+    wt.setReader(new StringReader( input ));
     TokenStream ts = wt;
     if (ignoreCase) {
-      ts = new LowerCaseFilter(org.apache.lucene.util.Version.LUCENE_48, wt );
+      ts = new LowerCaseFilter(wt);
     }
     StringBuffer strbuf = new StringBuffer( );
     try (AutoPhrasingTokenFilter aptf = new AutoPhrasingTokenFilter( ts, phraseSets, false )) {
@@ -160,10 +160,10 @@ public class AutoPhrasingQParserPlugin extends ExtendedDismaxQParserPlugin imple
     if (files.size() > 0) {
       // default stopwords list has 35 or so words, but maybe don't make it that
       // big to start
-      words = new CharArraySet( org.apache.lucene.util.Version.LUCENE_48, files.size() * 10, ignoreCase);
+      words = new CharArraySet( files.size() * 10, ignoreCase);
       for (String file : files) {
         List<String> wlist = getLines(loader, file.trim());
-    	words.addAll(StopFilter.makeStopSet(org.apache.lucene.util.Version.LUCENE_48, wlist, ignoreCase));
+    	words.addAll(StopFilter.makeStopSet(wlist, ignoreCase));
       }
     }
     return words;

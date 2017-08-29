@@ -4,7 +4,7 @@
 
   <groupId>com.lucidworks.analysis</groupId>
   <artifactId>auto-phrase-tokenfilter</artifactId>
-  <version>1.1</version>
+  <version>2.0</version>
   <name>AutoPhrasing java library</name>
   <description>AutoPhrasing - LGPL Java library</description>
   <packaging>jar</packaging>
@@ -58,48 +58,17 @@
     </dependency>
 
     <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-analyzers-common</artifactId>
-      <version>4.8.1</version>
-    </dependency>
-
-	<dependency>
-	    <groupId>org.apache.lucene</groupId>
-	    <artifactId>lucene-core</artifactId>
-	    <version>4.8.1</version>
-	</dependency>
-
-    <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-codecs</artifactId>
-      <version>4.8.1</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-test-framework</artifactId>
-      <version>4.8.1</version>
-      <scope>test</scope>
+        <groupId>org.apache.lucene</groupId>
+        <artifactId>lucene-core</artifactId>
+        <version>6.6.0</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.solr</groupId>
       <artifactId>solr-core</artifactId>
-      <version>4.8.1</version>
+      <version>6.6.0</version>
     </dependency>
 
-    <dependency>
-      <groupId>org.apache.solr</groupId>
-      <artifactId>solr-solrj</artifactId>
-      <version>4.8.1</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.solr</groupId>
-      <artifactId>solr-test-framework</artifactId>
-      <version>4.8.1</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
 </project>

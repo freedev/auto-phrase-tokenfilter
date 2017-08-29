@@ -4,14 +4,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.apache.lucene.util.AttributeImpl;
+import org.apache.lucene.analysis.CharArrayMap;
+import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
-import org.apache.lucene.analysis.util.CharArraySet;
-import org.apache.lucene.analysis.util.CharArrayMap;
+import org.apache.lucene.util.AttributeImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -432,7 +432,7 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
   
 	
   private CharArrayMap<CharArraySet> convertPhraseSet( CharArraySet phraseSet ) {
-	CharArrayMap<CharArraySet> phraseMap = new CharArrayMap<>(org.apache.lucene.util.Version.LUCENE_48, 100, false);
+	CharArrayMap<CharArraySet> phraseMap = new CharArrayMap<>( 100, false);
 	Iterator<Object> phraseIt = phraseSet.iterator( ); 
 	while (phraseIt != null && phraseIt.hasNext() ) {
 	  char[] phrase = (char[])phraseIt.next();
@@ -444,7 +444,7 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
 			
 	  CharArraySet itsPhrases = phraseMap.get( firstTerm, 0, firstTerm.length );
 	  if (itsPhrases == null) {
-	    itsPhrases = new CharArraySet( org.apache.lucene.util.Version.LUCENE_48, 5, false );
+	    itsPhrases = new CharArraySet( 5, false );
 		phraseMap.put( new String( firstTerm ), itsPhrases );
       }
 			
@@ -510,7 +510,7 @@ public class AutoPhrasingTokenFilter extends TokenFilter {
   
   private CharArraySet remove( CharArraySet fromSet, char[] charArray ) {
     Log.debug( "remove from: " + new String( charArray ));
-    CharArraySet newSet = new CharArraySet( org.apache.lucene.util.Version.LUCENE_48, 5, false );
+    CharArraySet newSet = new CharArraySet( 5, false );
     Iterator<Object> phraseIt = currentSetToCheck.iterator();
     while (phraseIt != null && phraseIt.hasNext() ) {
       char[] phrase = (char[])phraseIt.next();
